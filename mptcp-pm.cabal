@@ -68,9 +68,10 @@ library
       Net.SockDiag, Net.Tcp, Net.Mptcp, Net.IPAddress
       , Net.Mptcp.PathManager, Net.Mptcp.Constants, Net.SockDiag.Constants
       , Net.Mptcp.PathManager.Default
+      , Net.Tcp.Definitions
+
     other-modules:
-        Net.Tcp.Definitions
-        , Net.Tcp.Constants
+        Net.Tcp.Constants
 
 
 -- monitor new mptcp connections
