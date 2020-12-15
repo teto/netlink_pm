@@ -58,7 +58,7 @@ import System.Linux.Netlink.GeNetlink as GENL
 import System.Linux.Netlink.Constants as NLC
 -- import System.Linux.Netlink.Constants (eRTM_NEWADDR)
 -- import System.Linux.Netlink.Helpers
-import System.Log.FastLogger
+-- import System.Log.FastLogger
 import System.Linux.Netlink.GeNetlink.Control
 import qualified System.Linux.Netlink.Simple as NLS
 import qualified System.Linux.Netlink.Route as NLR
@@ -286,24 +286,24 @@ startMonitorConnection :: CLIArguments
 startMonitorConnection cliArgs elapsed mptcpSock sockMetrics mConn = do
     let (MptcpSocket sock _) = mptcpSock
     myId <- myThreadId
-    putStr $ show myId ++ ": monitoring connection at *time* " ++ (show elapsed) ++ " ..."
+    putStr $ show myId ++ ": monitoring connection at *time* " ++ show elapsed ++ " ..."
     -- as long as conn is not empty we keep going ?
     -- for this connection
     -- query metrics for the whole MPTCP connection
     mptcpConn <- readMVar mConn
     putStrLn "Showing MPTCP connection"
     putStrLn $ show mptcpConn ++ "..."
-    let token = connectionToken mptcpConn
+    let _token = connectionToken mptcpConn
     let tmpdir = out cliArgs
 
     -- TODO this is the issue
     -- not sure it's the master with a set
-    let masterSf = Set.elemAt 0 (subflows mptcpConn)
+    let _masterSf = Set.elemAt 0 (subflows mptcpConn)
 
     -- Get updated metrics
     lastMetrics <- mapM (updateSubflowMetrics sockMetrics) (Set.toList $ subflows mptcpConn)
-    let filename = tmpdir ++ "/" ++ "mptcp_" ++ (show $ connectionToken mptcpConn) ++ "_" ++ (show elapsed) ++ ".json"
-    logStatistics filename elapsed mptcpConn lastMetrics
+    let filename = tmpdir ++ "/" ++ "mptcp_" ++ show (connectionToken mptcpConn) ++ "_" ++ show elapsed ++ ".json"
+    -- logStatistics filename elapsed mptcpConn lastMetrics
 
     duration <- case optimizer cliArgs of
       Nothing -> return onSuccessSleepingDelayMs
@@ -689,10 +689,6 @@ listenToMetricEvents sock myGroup = do
   -- where
   --   -- mptcpSocket = MptcpSocket sock fid
   --   globalState = MyState mptcpSocket Map.empty
-
-
-createLogger :: IO LoggerSet
-createLogger = newStdoutLoggerSet defaultBufSize
 
 
 dumpExtensionAttribute :: Int -> ByteString -> SockDiagExtension

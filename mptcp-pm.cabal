@@ -46,8 +46,7 @@ library
     autogen-modules: Net.Mptcp.Constants, Net.SockDiag.Constants, Net.Tcp.Constants
     build-depends: base >= 4.12 ,
       containers, bytestring
-       -- TODO use katip instead
-       , fast-logger
+       -- , fast-logger
        , katip
        , process
        , cereal
@@ -63,14 +62,10 @@ library
        , unordered-containers
        -- to create temp folder/files
        , transformers
-       -- , temporary
-       -- , filepath
-       -- , bitset  -- bitset, interesting but broken
     hs-source-dirs: .
     build-tool-depends: c2hs:c2hs
     Exposed-Modules:
       Net.SockDiag, Net.Tcp, Net.Mptcp, Net.IPAddress
-      -- 
       , Net.Mptcp.PathManager, Net.Mptcp.Constants, Net.SockDiag.Constants
       , Net.Mptcp.PathManager.Default
     other-modules:
@@ -82,7 +77,6 @@ library
 -- and delegate the behavior to a monitor
 executable mptcp-manager
     import: shared-properties
-
     -- ghc-options: -prof
     build-depends:
         aeson
@@ -94,7 +88,7 @@ executable mptcp-manager
        , mptcp-pm
        , optparse-applicative
        , transformers
-       , fast-logger
+       -- , fast-logger
        , hslogger
        , ip
        , text
@@ -103,6 +97,8 @@ executable mptcp-manager
        , process
        , temporary
        , filepath
+       -- to use Simple module. Try to do without
+       , netlink >= 1.1.2.0
     default-extensions: DeriveGeneric
     main-is: daemon.hs
     hs-source-dirs: hs/
