@@ -45,7 +45,8 @@ library
     default-extensions: DeriveGeneric
     autogen-modules: Net.Mptcp.Constants, Net.SockDiag.Constants, Net.Tcp.Constants
     build-depends: base >= 4.12 ,
-      containers, bytestring
+      containers
+        , bytestring
        -- , fast-logger
        , katip
        , process
@@ -53,6 +54,7 @@ library
        , ip
        , bytestring-conversion
        , text
+       -- todo get rid of it
        , mtl
        -- for merge
        , aeson
