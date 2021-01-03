@@ -33,7 +33,7 @@ import Data.Word (Word8, Word32)
 -- GenBind.evalCCast: Casts are implemented only for integral constants
 -- {#enum define TcpFlag {TCP_FLAG_SYN as TcpFlagSyn} deriving (Eq, Show)#}
 
-data TcpFlag = TcpFlagSyn | TcpFlagFin | TcpFlagAck
+data TcpFlag = TcpFlagSyn | TcpFlagFin | TcpFlagAck deriving (Eq, Show)
 
 -- {#const TCP_FLAG_SYN#}
 tcpFlagSynVal :: Word32

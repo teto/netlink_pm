@@ -19,6 +19,8 @@ module Net.SockDiag (
   , loadExtension
   , showExtension
   , connectionFromDiag
+  -- WARN dont use it will be removed
+  , enumsToWord
 ) where
 
 -- import Generated
@@ -41,14 +43,13 @@ import System.Linux.Netlink.Constants
 import qualified Data.Bits as B
 import Data.Bits ((.|.))
 import qualified Data.Map as Map
-import Data.ByteString ()
+import Data.ByteString (ByteString, pack)
 import Data.ByteString.Char8 as C8 (unpack, init)
 import Net.IPAddress
 import Net.IP ()
 -- import Net.IPv4
 import Net.Tcp
 import Net.SockDiag.Constants
-import Data.ByteString (ByteString, pack, )
 
 --
 -- import Data.BitSet.Word
@@ -96,7 +97,7 @@ instance Enum2Bits TcpState where
   shiftL state = B.shiftL 1 (fromEnum state)
 
 instance Enum2Bits SockDiagExtensionId where
-  shiftL state = B.shiftL 1 ((fromEnum state) - 1)
+  shiftL state = B.shiftL 1 (fromEnum state - 1)
 
 
 
@@ -178,7 +179,7 @@ getSockDiagRequestHeader = do
     states <- getWord32host
     _sockid <- getInetDiagSockid
     -- TODO reestablish states
-    return $ SockDiagRequest addressFamily protocol 
+    return $ SockDiagRequest addressFamily protocol
       (wordToEnums extended :: [SockDiagExtensionId]) (wordToEnums states :: [TcpState])  _sockid
 
 -- |'Put' function for 'GenlHeader'

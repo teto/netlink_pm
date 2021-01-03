@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: mptcp-pm
-version: 0.0.3
+version: 0.0.4
 license: GPL-3.0-only
 license-file: LICENSE
 build-type: Simple
@@ -67,13 +67,17 @@ library
     hs-source-dirs: .
     build-tool-depends: c2hs:c2hs
     Exposed-Modules:
-      Net.SockDiag, Net.Tcp, Net.Mptcp, Net.IPAddress
-      , Net.Mptcp.PathManager, Net.Mptcp.Constants, Net.SockDiag.Constants
-      , Net.Mptcp.PathManager.Default
+      Net.SockDiag
+      , Net.Tcp
+      , Net.Mptcp
+      , Net.IPAddress
       , Net.Tcp.Definitions
-
-    other-modules:
-        Net.Tcp.Constants
+      , Net.Tcp.Constants
+      , Net.Mptcp.Constants, Net.SockDiag.Constants
+      -- TODO let it high level
+      , Net.Mptcp.PathManager
+      , Net.Mptcp.PathManager.Default
+    -- other-modules:
 
 
 -- monitor new mptcp connections
@@ -106,3 +110,15 @@ executable mptcp-manager
     main-is: daemon.hs
     hs-source-dirs: hs/
     ghc-options: -threaded -fprof-auto -rtsopts
+
+Test-Suite test-tcp
+--   -- 2 types supported, exitcode is based on ... exit codes ....
+  type:               exitcode-stdio-1.0
+  main-is:            Main.hs
+  hs-source-dirs:     test
+  -- Other-modules:     Pcap, Columns
+
+  build-depends:      base >=4.12 && <4.20
+                     , HUnit
+                     , mptcp-pm
+                     , ip

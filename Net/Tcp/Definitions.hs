@@ -50,10 +50,10 @@ reverseConnection con = con {
   , subflowInterface = Nothing
 }
 
-
 instance FromJSON TcpConnection
 instance ToJSON TcpConnection
 
+-- TODO create a specific function for it
 -- ignore the rest
 instance Eq TcpConnection where
   x == y = srcIp x == srcIp y && dstIp x == dstIp y

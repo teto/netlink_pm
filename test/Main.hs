@@ -1,4 +1,4 @@
-{-| 
+{-|
 https://stackoverflow.com/questions/32913552/why-does-my-hunit-test-suite-pass-when-my-tests-fail
 -}
 module Main where
@@ -7,6 +7,7 @@ import System.Exit
 import Test.HUnit
 import Net.SockDiag
 import Net.Mptcp
+import Net.Tcp
 import Net.IP
 import Net.IPv4 (localhost)
 
@@ -29,6 +30,8 @@ testComboReverse = TestCase $ assertEqual
   513
   ( enumsToWord [TcpEstablished, TcpListen] )
 
+-- testTcpFlagSyn = TestCase $ assertEqual
+  
 
 iperfConnection = TcpConnection {
         srcIp = fromIPv4 localhost
@@ -74,11 +77,10 @@ main = do
           (iperfConnection == modifiedConnection)
       , TestCase $ assertBool "connection should be considered as in list"
           (modifiedConnection `elem` filteredConnections)
-      , TestCase $ assertBool "connection should not be considered as in list"
-          (modifiedConnection `notElem` filteredConnections)
+      -- , TestCase $ assertBool "connection should not be considered as in list"
+      --     (modifiedConnection `notElem` filteredConnections)
       ]
-  if (errors results + failures results == 0)
-    then
-      exitWith ExitSuccess
+  if errors results + failures results == 0 then
+      exitSuccess
     else
       exitWith (ExitFailure 1)
