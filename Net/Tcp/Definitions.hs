@@ -1,8 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Net.Tcp.Definitions (
     TcpConnection (..)
-    , reverse
-    , nameFromTcpConnection
+    , ConnectionRole (..)
+    , reverseTcpConnection
+    , showTcpConnection
 )
 
 where
@@ -12,6 +14,7 @@ import Net.IP
 import Data.Aeson
 import Data.Word (Word8, Word16, Word32)
 import GHC.Generics
+import qualified Data.Text as TS
 
 {- Describe a TCP connection, possibly an Mptcp subflow
   The equality implementation ignores several fields
@@ -32,14 +35,24 @@ data TcpConnection = TcpConnection {
 
 } deriving (Show, Generic, Ord)
 
+tshow :: Show a => a -> TS.Text
+tshow = TS.pack . Prelude.show
 
-nameFromTcpConnection :: TcpConnection -> String
-nameFromTcpConnection con =
-  show (srcIp con) ++ ":" ++ show (srcPort con) ++ " -> " ++ show (dstIp con) ++ ":" ++ show (dstPort con)
+data ConnectionRole = Server | Client deriving (Show, Eq)
 
 
-reverseConnection :: TcpConnection -> TcpConnection
-reverseConnection con = con {
+showTcpConnectionText :: TcpConnection -> TS.Text
+showTcpConnectionText con =
+  showIp ( srcIp con) <> ":" <> tshow (srcPort con) <> " -> " <> showIp (dstIp con) <> ":" <> tshow (dstPort con)
+  where
+    showIp = Net.IP.encode
+
+showTcpConnection :: TcpConnection -> String
+showTcpConnection = TS.unpack . showTcpConnectionText
+
+
+reverseTcpConnection :: TcpConnection -> TcpConnection
+reverseTcpConnection con = con {
   srcIp = dstIp con
   , dstIp = srcIp con
   , srcPort = dstPort con
