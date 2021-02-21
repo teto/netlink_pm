@@ -51,6 +51,7 @@ library
        , katip
        , process
        , cereal
+       , enumset
        , ip
        , bytestring-conversion
        , text
@@ -69,6 +70,7 @@ library
     Exposed-Modules:
       Net.SockDiag
       , Net.Tcp
+      , Net.Bitset
       , Net.Mptcp
       , Net.IPAddress
       , Net.Tcp.Definitions
@@ -114,9 +116,10 @@ executable mptcp-manager
 Test-Suite test-tcp
   -- 2 types supported, exitcode is based on ... exit codes ....
   type:               exitcode-stdio-1.0
+  default-language: Haskell2010
   main-is:            Main.hs
   hs-source-dirs:     test
-
+  ghc-options: -threaded -fprof-auto -rtsopts
   build-depends:      base >=4.12
                      , HUnit
                      , mptcp-pm

@@ -35,7 +35,7 @@ import qualified System.Linux.Netlink.Route as NLR
 import System.Linux.Netlink as NL
 import Debug.Trace
 import Control.Concurrent
-import System.Linux.Netlink.Constants (eRTM_NEWADDR)
+-- import System.Linux.Netlink.Constants (eRTM_NEWADDR)
 import System.Linux.Netlink.Constants as NLC
 -- import qualified System.Linux.Netlink.Simple as NLS
 import Data.ByteString (ByteString, empty)

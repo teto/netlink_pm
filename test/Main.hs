@@ -10,12 +10,14 @@ import Net.SockDiag
 import Net.Mptcp
 import Net.Tcp
 import Net.IP
+import Net.Bitset
 
 import Net.IPv4 (localhost)
 import Numeric (readHex)
 import Data.Text (Text)
 import qualified Data.Text as T
 
+-- TODO reestablish this
 testEmpty = TestCase $ assertEqual
   "Check"
   1
@@ -31,7 +33,6 @@ testComboReverse = TestCase $ assertEqual
   513
   ( enumsToWord [TcpEstablished, TcpListen] )
 
--- testTcpFlagSyn = TestCase $ assertEqual
 
 iperfConnection = TcpConnection {
         srcIp = fromIPv4 localhost
@@ -63,7 +64,7 @@ connectionFilter = TestCase $ assertBool
 --  returns a list of possible parses as (a,String) pairs.
 loadTcpFlagsFromHex :: Text -> [TcpFlag]
 loadTcpFlagsFromHex text = case readHex (T.unpack $ T.drop 2 text) of
-  [(n, "")] -> numberToTcpFlags n
+  [(n, "")] -> fromBitMask n
   _ -> error $ "TcpFlags: could not parse " ++ T.unpack text
 
 
@@ -78,16 +79,17 @@ main = do
   results <- runTestTT $ TestList [
       TestLabel "subflow is correctly filtered" connectionFilter
       , TestCase $ assertBool "connection should be equal" (iperfConnection == iperfConnection)
-      , TestCase $ assertBool "connection should be equal despite different interfaces"
-          (iperfConnection == modifiedConnection)
+      , TestCase $ assertEqual "connection should be equal despite different interfaces"
+          iperfConnection modifiedConnection
       , TestCase $ assertBool "connection should be considered as in list"
           (modifiedConnection `elem` filteredConnections)
       -- , TestCase $ assertBool "connection should not be considered as in list"
       --     (modifiedConnection `notElem` filteredConnections)
       , TestList [
-        TestCase $ assertEqual "Check tcp syn flags" [TcpFlagSyn]
+        TestCase $ assertEqual "to bitset " 2 (toBitMask [TcpFlagSyn])
+        , TestCase $ assertEqual "Check tcp syn flags" [TcpFlagSyn]
           (loadTcpFlagsFromHex "0x00000002")
-        , TestCase $ assertBool "Check tcp syn/ack flags" [TcpFlagSyn, TcpFlagAck ]
+        , TestCase $ assertEqual "Check tcp syn/ack flags" [TcpFlagSyn, TcpFlagAck]
           (loadTcpFlagsFromHex "0x00000012")
       ]
     ]

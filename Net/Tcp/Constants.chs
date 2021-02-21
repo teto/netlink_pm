@@ -33,28 +33,39 @@ import Data.Word (Word32)
 -- GenBind.evalCCast: Casts are implemented only for integral constants
 -- {#enum define TcpFlag {TCP_FLAG_SYN as TcpFlagSyn} deriving (Eq, Show)#}
 
-data TcpFlag = TcpFlagSyn | TcpFlagFin | TcpFlagAck deriving (Eq, Show)
+data TcpFlag = TcpFlagFin | TcpFlagSyn | TcpFlagRst | TcpFlagPsh
+    | TcpFlagAck | TcpFlagUrg | TcpFlagEcn | TcpFlagCwr | TcpFlagNonce
+        deriving (Eq, Show, Bounded)
 
+-- values are power of 2 of the flag
 instance Enum TcpFlag where
-    toEnum 1 = TcpFlagFin
-    toEnum 2 = TcpFlagSyn
-    toEnum 8 = TcpFlagAck
+    toEnum 0 = TcpFlagFin
+    toEnum 1 = TcpFlagSyn
+    toEnum 2 = TcpFlagRst
+    toEnum 3 = TcpFlagPsh
+    toEnum 4 = TcpFlagAck
+    toEnum 5 = TcpFlagUrg
+    toEnum 6 = TcpFlagEcn
+    toEnum 7 = TcpFlagCwr
+    toEnum 8 = TcpFlagNonce
+    toEnum n = error $ "toEnum n: " ++ show n
 
-    fromEnum TcpFlagSyn = 2
-    fromEnum TcpFlagFin = 1
-    fromEnum TcpFlagAck = 8
+    fromEnum TcpFlagFin = 0
+    fromEnum TcpFlagSyn = 1
+    fromEnum TcpFlagRst = 2
+    fromEnum TcpFlagPsh = 3
+    fromEnum TcpFlagAck = 4
+    fromEnum TcpFlagUrg = 5
+    fromEnum TcpFlagEcn = 6
+    fromEnum TcpFlagCwr = 7
+    fromEnum TcpFlagNonce = 8
+    -- fromEnum _ = error $ "fromEnum not implemented"
 
--- {#const TCP_FLAG_SYN#}
-tcpFlagSynVal :: Word32
-tcpFlagSynVal = 2
-
-tcpFlagFinVal :: Word32
-tcpFlagFinVal = 1
-
-tcpFlagAckVal :: Word32
-tcpFlagAckVal = 8
--- tcpFlagAck :: Word8
--- tcpFlagAck = {#const TCP_FLAG_ACK #}
+    enumFrom     x   = enumFromTo     x maxBound
+    enumFromThen x y = enumFromThenTo x y bound
+      where
+        bound | fromEnum y >= fromEnum x = maxBound
+              | otherwise                = minBound
 
 
 -- TCP_FLAG_CWR = __constant_cpu_to_be32(0x00800000),
