@@ -15,7 +15,7 @@ module Net.Tcp.Constants
 where
 
 import Data.Bits ()
-import Data.Word (Word8, Word32)
+import Data.Word (Word32)
 
 -- copy from include/net/tcp_states since it's not part of the user API
 #include <tcp_states.h>
@@ -36,13 +36,13 @@ import Data.Word (Word8, Word32)
 data TcpFlag = TcpFlagSyn | TcpFlagFin | TcpFlagAck deriving (Eq, Show)
 
 instance Enum TcpFlag where
-	toEnum 1 = TcpFlagFin
-	toEnum 2 = TcpFlagSyn
-	toEnum 8 = TcpFlagAck
+    toEnum 1 = TcpFlagFin
+    toEnum 2 = TcpFlagSyn
+    toEnum 8 = TcpFlagAck
 
-	fromEnum TcpFlagSyn = 2
-	fromEnum TcpFlagFin = 1
-	fromEnum TcpFlagAck = 8
+    fromEnum TcpFlagSyn = 2
+    fromEnum TcpFlagFin = 1
+    fromEnum TcpFlagAck = 8
 
 -- {#const TCP_FLAG_SYN#}
 tcpFlagSynVal :: Word32

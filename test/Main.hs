@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-|
 https://stackoverflow.com/questions/32913552/why-does-my-hunit-test-suite-pass-when-my-tests-fail
 -}
@@ -9,11 +10,11 @@ import Net.SockDiag
 import Net.Mptcp
 import Net.Tcp
 import Net.IP
-import Net.IPv4 (localhost)
 
--- main = do
---     putStrLn "This test always fails!"
---     exitFailure
+import Net.IPv4 (localhost)
+import Numeric (readHex)
+import Data.Text (Text)
+import qualified Data.Text as T
 
 testEmpty = TestCase $ assertEqual
   "Check"
@@ -31,7 +32,6 @@ testComboReverse = TestCase $ assertEqual
   ( enumsToWord [TcpEstablished, TcpListen] )
 
 -- testTcpFlagSyn = TestCase $ assertEqual
-  
 
 iperfConnection = TcpConnection {
         srcIp = fromIPv4 localhost
@@ -45,19 +45,27 @@ iperfConnection = TcpConnection {
         , remoteId = 0
     }
 
-modifiedConnection = iperfConnection {
-  subflowInterface = Just 0
-}
+modifiedConnection = iperfConnection { subflowInterface = Just 0 }
 
 filteredConnections :: [TcpConnection]
-filteredConnections = [
-  iperfConnection
-    ]
+filteredConnections = [ iperfConnection ]
 
 
 connectionFilter = TestCase $ assertBool
   "Check connection is in the list"
   (iperfConnection `elem` filteredConnections)
+
+
+
+
+-- check we can read an hex from tshark
+-- 0x00000012
+--  returns a list of possible parses as (a,String) pairs.
+loadTcpFlagsFromHex :: Text -> [TcpFlag]
+loadTcpFlagsFromHex text = case readHex (T.unpack $ T.drop 2 text) of
+  [(n, "")] -> numberToTcpFlags n
+  _ -> error $ "TcpFlags: could not parse " ++ T.unpack text
+
 
 -- connectionFilter = TestCase $ assertEqual
 --   "Check connection is in the list"
@@ -68,9 +76,6 @@ connectionFilter = TestCase $ assertBool
 main = do
 
   results <- runTestTT $ TestList [
-      -- testEmpty
-      -- , testCombo
-      -- , testComboReverse,
       TestLabel "subflow is correctly filtered" connectionFilter
       , TestCase $ assertBool "connection should be equal" (iperfConnection == iperfConnection)
       , TestCase $ assertBool "connection should be equal despite different interfaces"
@@ -79,7 +84,13 @@ main = do
           (modifiedConnection `elem` filteredConnections)
       -- , TestCase $ assertBool "connection should not be considered as in list"
       --     (modifiedConnection `notElem` filteredConnections)
+      , TestList [
+        TestCase $ assertEqual "Check tcp syn flags" [TcpFlagSyn]
+          (loadTcpFlagsFromHex "0x00000002")
+        , TestCase $ assertBool "Check tcp syn/ack flags" [TcpFlagSyn, TcpFlagAck ]
+          (loadTcpFlagsFromHex "0x00000012")
       ]
+    ]
   if errors results + failures results == 0 then
       exitSuccess
     else

@@ -77,13 +77,13 @@ library
       -- TODO let it high level
       , Net.Mptcp.PathManager
       , Net.Mptcp.PathManager.Default
-    -- other-modules:
 
 
 -- monitor new mptcp connections
 -- and delegate the behavior to a monitor
 executable mptcp-manager
     import: shared-properties
+    default-language: Haskell2010
     -- ghc-options: -prof
     build-depends:
         aeson
@@ -112,13 +112,12 @@ executable mptcp-manager
     ghc-options: -threaded -fprof-auto -rtsopts
 
 Test-Suite test-tcp
---   -- 2 types supported, exitcode is based on ... exit codes ....
+  -- 2 types supported, exitcode is based on ... exit codes ....
   type:               exitcode-stdio-1.0
   main-is:            Main.hs
   hs-source-dirs:     test
-  -- Other-modules:     Pcap, Columns
 
-  build-depends:      base >=4.12 && <4.20
+  build-depends:      base >=4.12
                      , HUnit
                      , mptcp-pm
-                     , ip
+                     , ip, text

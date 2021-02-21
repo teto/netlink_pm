@@ -29,7 +29,7 @@ tcpFlagRef TcpFlagAck = 8
 
 numberToTcpFlags :: Int -> [TcpFlag]
 numberToTcpFlags n = Prelude.filter  (\x -> combi x /= 0 ) list
-    where
-        combi x = (.&.) n (tcpFlagRef x)
-        list = [TcpFlagSyn, TcpFlagAck, TcpFlagFin ]
+  where
+    combi x = (.&.) n (tcpFlagRef x)
+    list = [TcpFlagSyn, TcpFlagAck, TcpFlagFin ]
 

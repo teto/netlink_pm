@@ -26,27 +26,23 @@ iproute2/misc/ss.c to see how `ss` utility interacts with the kernel
 
 module Main where
 
+import Net.SockDiag
+import Net.Mptcp
+import Net.Mptcp.PathManager
+import Net.Mptcp.PathManager.Default
+import Net.Tcp
+import Net.IP
+import Net.SockDiag.Constants
+import Net.Mptcp.Constants
+
+import Text.Read (readMaybe)
+import Data.Text ()
 import Prelude hiding (concat, init)
 import Options.Applicative hiding (value, ErrorMsg, empty)
 import qualified Options.Applicative (value)
 import Control.Monad.Trans (liftIO)
 import Control.Monad.Trans.State (State, StateT, put, get,
         execStateT)
-import Net.SockDiag
-import Net.Mptcp
-import Net.Mptcp.PathManager
-import Net.Mptcp.PathManager.Default
-import Net.Tcp
--- import Net.Tcp.Constants
-import Net.IP
-
-import Net.SockDiag.Constants
-import Net.Mptcp.Constants
-
-import Text.Read (readMaybe)
--- pack
-import Data.Text ()
-
 import Control.Monad (foldM)
 import Data.Maybe (catMaybes)
 import Foreign.C.Types (CInt)
@@ -73,15 +69,11 @@ import Data.Serialize.Put
 -- import Data.Either (fromRight)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as BL
-
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-
 -- import qualified Data.Text
 import Data.Bits (Bits(..))
-
 import Debug.Trace
-
 import Control.Concurrent
 -- import System.IO.Unsafe
 import System.IO.Temp ()
@@ -91,6 +83,7 @@ import System.IO (stderr)
 import Data.Aeson
 -- to merge MptcpConnection export and Metrics
 import Data.Aeson.Extra.Merge  (lodashMerge)
+import GHC.List (init)
 
 -- for getEnvDefault, to get TMPDIR value.
 -- we could pass it as an argument
@@ -271,6 +264,25 @@ updateSubflowMetrics sockMetrics subflow = do
     -- filter ? keep only valud ones ?
     return $ head (catMaybes metrics_m)
 
+isFlagSet :: Bits a => a -> a -> Bool
+isFlagSet f v = (f .&. v) == f
+
+-- Copy/pasted from System.Linux.Netlink
+-- |Internal function to receive multiple netlink messages
+recvMulti :: (Convertable a, Eq a, Show a) => NetlinkSocket -> IO [Packet a]
+recvMulti sock = do
+    pkts <- recvOne sock
+    if isMulti (first pkts)
+        then if isDone (last pkts)
+             -- This is fine because first would have complained before
+             then return $ init pkts
+             else (pkts ++) <$> recvMulti sock
+        else return pkts
+  where
+    isMulti = isFlagSet fNLM_F_MULTI . messageFlags . packetHeader
+    isDone  = (== eNLMSG_DONE) . messageType . packetHeader
+    first (x:_) = x
+    first [] = error "Got empty list from recvOne in recvMulti, this shouldn't happen"
 
 {- |
   Starts monitoring a specific MPTCP connection
